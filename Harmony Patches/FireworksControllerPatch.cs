@@ -9,9 +9,21 @@ using UnityEngine;
 namespace AudioModifiers {
     [HarmonyPatch(typeof(FireworkItemController))]
     [HarmonyPatch("PlayExplosionSound", MethodType.Normal)]
-    public class FireworksControllerPatch {
+    public class FireworksControllerExplosionSoundPatch {
         public static bool Prefix(ref FireworkItemController __instance) {
             return !AudioModifiersPlugin.cfg.DisableFireworks;
+        }
+    }
+
+    [HarmonyPatch(typeof(FireworkItemController))]
+    [HarmonyPatch("Awake", MethodType.Normal)]
+    public class FireworksControllerAwakePatch {
+        public static bool Prefix(ref FireworkItemController __instance, ref RandomObjectPicker<AudioClip> ____randomAudioPicker) {
+            if (AudioModifiersPlugin.FireworksFX.Count > 0) {
+                ____randomAudioPicker = AudioModifiersPlugin.FireworkSFXPicker;
+                return false;
+            }
+            return true;
         }
     }
 }

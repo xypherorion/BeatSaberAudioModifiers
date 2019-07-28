@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AudioModifiers</RootNamespace>
     <AssemblyName>AudioModifiers</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -35,15 +35,28 @@
   <PropertyGroup>
     <RunPostBuildEvent>Always</RunPostBuildEvent>
   </PropertyGroup>
+  <PropertyGroup />
   <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>G:\Games\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\0Harmony.dll</HintPath>
+    <Reference Include="0Harmony.1.2.0.1">
+      <HintPath>G:\Games\Steam\steamapps\common\Beat Saber\Libs\0Harmony.1.2.0.1.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>G:\Games\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
-    <Reference Include="IllusionPlugin">
-      <HintPath>G:\Games\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\IllusionPlugin.dll</HintPath>
+    <Reference Include="BS_Utils">
+      <HintPath>G:\Games\Steam\steamapps\common\Beat Saber\Plugins\BS_Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="I18N">
+      <HintPath>G:\Games\Steam\steamapps\common\Beat Saber\IPA\Data\Managed\I18N.dll</HintPath>
+    </Reference>
+    <Reference Include="I18N.West">
+      <HintPath>G:\Games\Steam\steamapps\common\Beat Saber\IPA\Data\Managed\I18N.West.dll</HintPath>
+    </Reference>
+    <Reference Include="IPA.Injector">
+      <HintPath>G:\Games\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\IPA.Injector.dll</HintPath>
+    </Reference>
+    <Reference Include="IPA.Loader">
+      <HintPath>G:\Games\Steam\steamapps\common\Beat Saber\IPA\Data\Managed\IPA.Loader.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -83,13 +96,23 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>G:\Games\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.XRModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>G:\Games\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.XRModule.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Harmony Patches\FireworksControllerPatch.cs" />
     <Compile Include="Harmony Patches\HitSoundsPatch.cs" />
+    <Compile Include="Harmony Patches\SaberClashEffectPatch.cs" />
+    <Compile Include="Harmony Patches\SongPreviewPlayerPatch.cs" />
     <Compile Include="ModConfiguration.cs" />
     <Compile Include="AudioModifiersPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SwordSound.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="manifest.json" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -2,29 +2,50 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-using IllusionPlugin;
+using IPA;
 using UnityEngine.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Networking;
 using Harmony;
 
 namespace AudioModifiers {
-    public class AudioModifiersPlugin : IPlugin {
+    public class AudioModifiersPlugin : IBeatSaberPlugin {
+        public enum SoundCategory {
+            Hit = 0,
+            Miss,
+            Music,
+            Fireworks,
+            Saber,
+            Clash,
+            Unknown
+        }
+
         public string Name => "AudioModifiers";
-        public string Version => "0.0.2";
+        public string Version => "1.1.0.0";
 
         public bool writeLogOnExit = true;
-        public static string logFilePath = "./AudioModifiers.log";
+        public static string logFilePath = "./UserData/AudioModifiers/AudioModifiers.log";
         public static string LogFileData = "";
+        protected static string appFolder = ".\\";
 
         public static HarmonyInstance harmony = null;
 
-        protected static List<AudioClip> HitSounds = new List<AudioClip>();
-        protected static List<AudioClip> MissSounds = new List<AudioClip>();
+        public static List<AudioClip> HitSounds = new List<AudioClip>();
+        public static List<AudioClip> MissSounds = new List<AudioClip>();
+        public static List<AudioClip> BGMusic = new List<AudioClip>();
+        public static List<AudioClip> FireworksFX = new List<AudioClip>();
+        public static List<AudioClip> SaberWhoosh = new List<AudioClip>();
+        public static List<AudioClip> SaberClashFX = new List<AudioClip>();
         public static RandomObjectPicker<AudioClip> HitSoundPicker = null;
         public static RandomObjectPicker<AudioClip> MissSoundPicker = null;
-        
-        public static string cfgFilePath = "./Config/AudioModifiers.json";
+        public static RandomObjectPicker<AudioClip> BGMusicPicker = null;
+        public static RandomObjectPicker<AudioClip> FireworkSFXPicker = null;
+        public static RandomObjectPicker<AudioClip> SaberClashPicker = null;
+
+        public static AudioSource ClashSource = null;
+
+        public static string cfgFilePath = "./UserData/AudioModifiers/AudioModifiers.json";
         public static ModConfiguration cfg = null;
 
         public static void Log(string message) {
@@ -32,9 +53,8 @@ namespace AudioModifiers {
             LogFileData += message + '\n';
         }
 
-
         #region Harmony
-        public static string strHarmonyInstance = "com.XypherOrion.SynthRiders.Weaponcraft";
+        public static string strHarmonyInstance = "com.XypherOrion.AudioModifiers.BeatSaber";
 
         public static void ApplyPatches() {
             bool success = true;
@@ -56,6 +76,8 @@ namespace AudioModifiers {
                 Log("Harmony Patches Successful");
             else
                 Log("Harmony Patches FAILED");
+
+            appFolder = Application.dataPath + "/";
         }
 
         public static void RemovePatches() {
@@ -75,183 +97,209 @@ namespace AudioModifiers {
             File.WriteAllText("./GameObjects.txt", GameObjectNames);
         }
 
-        public void LoadHitSounds() {
-            //TODO: Make folders for sounds in addition to keying on substrings
-            // eg: hit/ miss/ 
-            //TODO: Accuracy Categories
-            // eg: 110_ hits assign SuperHit.ogg, 80-100 hits assign GoodHit.ogg, etc
-            if (Directory.Exists("CustomHits")) {
-                Log("Reading Custom Hit Sounds");
-
-                WWW www = null;
-
-                string appFolder = Application.dataPath + "/../";
-
-                int f;
-                string[] AudioFiles;
-                AudioClip clip;
-
-                //Super lazy copypasta
-                #region Load Copypasta
-                AudioFiles = Directory.GetFiles("CustomHits", "*hit*.ogg");
-                if (AudioFiles.Length > 0) {
-                    for (f = 0; f < AudioFiles.Length; f++) {
-                        www = new WWW("file://" + appFolder + AudioFiles[f]);
-
-                        while (!www.isDone)
-                            Log("Downloading... " + "file://" + appFolder + AudioFiles[f]);
-
-                        clip = www.GetAudioClip(true);
-                        clip.name = AudioFiles[f];
-
-                        if (!clip.LoadAudioData())
-                            Log("Unable to Load clip audio data " + clip.name);
-
-                        //clip = (AudioClip)Resources.Load("CustomHits/" + AudioFiles[f]);
-                        if (clip != null) {
-                            HitSounds.Add(clip);
-                            Log("Added " + AudioFiles[f] + " to Hit Sounds");
-                        } else {
-                            Log("Unable to add " + AudioFiles[f] + " to Hit sounds");
-                        }
-                    }
-                } else
-                    Log("No OGG Hit Files");
-
-                AudioFiles = Directory.GetFiles("CustomHits", "*hit*.wav");
-                if (AudioFiles.Length > 0) {
-                    for (f = 0; f < AudioFiles.Length; f++) {
-                        www = new WWW("file://" + appFolder + AudioFiles[f]);
-
-                        while (!www.isDone)
-                            Log("Downloading... " + "file://" + appFolder + AudioFiles[f]);
-
-                        clip = www.GetAudioClip(true);
-                        clip.name = AudioFiles[f];
-
-                        if (!clip.LoadAudioData())
-                            Log("Unable to Load clip audio data " + clip.name);
-
-                        //clip = (AudioClip)Resources.Load("CustomHits/" + AudioFiles[f]);
-                        if (clip != null) {
-                            HitSounds.Add(clip);
-                            Log("Added " + AudioFiles[f] + " to Hit Sounds");
-                        } else {
-                            Log("Unable to add " + AudioFiles[f] + " to Hit sounds");
-                        }
-                    }
-                } else
-                    Log("No WAV Hit Files");
-
-                HitSoundPicker = new RandomObjectPicker<AudioClip>(HitSounds.ToArray(), 0.0f);
-
-                AudioFiles = Directory.GetFiles("CustomHits", "*miss*.ogg");
-                if (AudioFiles.Length > 0) {
-                    for (f = 0; f < AudioFiles.Length; f++) {
-                        www = new WWW("file://" + appFolder + AudioFiles[f]);
-
-                        while (!www.isDone)
-                            Log("Downloading... " + "file://" + appFolder + AudioFiles[f]);
-
-                        clip = www.GetAudioClip(true);
-                        clip.name = AudioFiles[f];
-
-                        if (!clip.LoadAudioData())
-                            Log("Unable to Load clip audio data " + clip.name);
-
-                        //clip = (AudioClip)Resources.Load("CustomHits/" + AudioFiles[f]);
-                        if (clip != null) {
-                            MissSounds.Add(clip);
-                            Log("Added " + AudioFiles[f] + " to Miss Sounds");
-                        } else {
-                            Log("Unable to add " + AudioFiles[f] + " to Miss sounds");
-                        }
-                    }
-                } else
-                    Log("No OGG Miss Files");
-
-                AudioFiles = Directory.GetFiles("CustomHits", "*miss*.wav");
-                if (AudioFiles.Length > 0) {
-                    for (f = 0; f < AudioFiles.Length; f++) {
-                        www = new WWW("file://" + appFolder + AudioFiles[f]);
-
-                        while (!www.isDone)
-                            Log("Downloading... " + "file://" + appFolder + AudioFiles[f]);
-
-                        clip = www.GetAudioClip(true);
-                        clip.name = AudioFiles[f];
-
-                        if (!clip.LoadAudioData())
-                            Log("Unable to Load clip audio data " + clip.name);
-
-                        //clip = (AudioClip)Resources.Load("CustomHits/" + AudioFiles[f]);
-                        if (clip != null) {
-                            MissSounds.Add(clip);
-                            Log("Added " + AudioFiles[f] + " to Miss Sounds");
-                        } else {
-                            Log("Unable to add " + AudioFiles[f] + " to Miss sounds");
-                        }
-                    }
-                } else
-                    Log("No WAV Miss Files");
-                #endregion
-
-                MissSoundPicker = new RandomObjectPicker<AudioClip>(MissSounds.ToArray(), 0.0f);
-            } else {
-                Log("CustomHits folder does not exist! Creating.");
-                Directory.CreateDirectory("./CustomHits");
+        AudioType GetAudioType(string ext) {
+            ext = ext.ToLower();
+            switch (ext) {
+                case "wav":
+                    return AudioType.WAV;
+                case "ogg":
+                    return AudioType.OGGVORBIS;
+                case "mp3":
+                    return AudioType.MPEG;
+                default:
+                    return AudioType.UNKNOWN;
             }
+        }
+
+        protected bool LoadSounds(string[] ext, SoundCategory category) {
+            int f;
+            string[] AudioFiles;
+            AudioClip clip;
+            UnityWebRequest webRequest = null;
+            string kwd = "";
+            List<AudioClip> ClipCategory = null;
+
+            switch (category) {
+                case SoundCategory.Hit:
+                    kwd = "hits";
+                    ClipCategory = HitSounds;
+                    break;
+                case SoundCategory.Miss:
+                    kwd = "misses";
+                    ClipCategory = MissSounds;
+                    break;
+                case SoundCategory.Music:
+                    kwd = "music";
+                    ClipCategory = BGMusic;
+                    break;
+                case SoundCategory.Fireworks:
+                    kwd = "fireworks";
+                    ClipCategory = FireworksFX;
+                    break;
+                case SoundCategory.Saber:
+                    kwd = "saber";
+                    ClipCategory = SaberWhoosh;
+                    break;
+                case SoundCategory.Clash:
+                    kwd = "clash";
+                    ClipCategory = SaberClashFX;
+                    break;
+                case SoundCategory.Unknown:
+                    ClipCategory = new List<AudioClip>();
+                    break;
+            }
+
+            string[] dirs = Directory.GetDirectories("CustomAudio");
+
+            if (dirs.Length > 0) {
+                string dir = "";
+                for (int d = 0; d < dirs.Length; d++) {
+                    dir = dirs[d].ToLower() + "\\";
+                    if (dir.Contains(kwd)) {
+                        for (int t = 0; t < ext.Length; t++) {
+                            //AudioFiles = Directory.GetFiles("CustomHits", searchStr + "." + ext[t] + "*");
+                            AudioFiles = Directory.GetFiles(dir, "*." + ext[t]);
+                            if (AudioFiles.Length > 0) {
+                                for (f = 0; f < AudioFiles.Length; f++) {
+                                    webRequest = UnityWebRequestMultimedia.GetAudioClip("file://" + appFolder + "..\\" + AudioFiles[f], GetAudioType(ext[t]));
+                                    webRequest.SendWebRequest();
+                                    while (!webRequest.isDone) { }
+
+                                    if(webRequest.isHttpError || webRequest.isHttpError) {
+                                        Log("Unable to add " + AudioFiles[f] + " to " + category.ToString() + " Sounds");
+                                    } else {
+                                        clip = DownloadHandlerAudioClip.GetContent(webRequest);
+                                        if (clip == null) {
+                                            Log(AudioFiles[f] + " Clip is NULL");
+                                            continue;
+                                        }
+                                        //clip.name = AudioFiles[f];
+
+                                        else if (!clip.LoadAudioData()) {
+                                            Log("Unable to Load clip audio data " + clip.name);
+                                        } else {
+                                            ClipCategory.Add(clip);
+                                            Log("Added " + AudioFiles[f] + " to " + category.ToString() + " Sounds");
+                                        }
+                                    }
+                                }
+                            } else
+                                Log("No " + dir + "*." + ext[t] + " Files");
+                        }
+                    }
+                }
+            } else {
+                Log("No Custom Audio Folders exist");
+            }
+
+            return ClipCategory.Count > 0;
+        }
+
+        public void LoadCustomSounds() {
+            if (!Directory.Exists("CustomAudio")) 
+                Log("CustomAudio folders do not exist! Creating.");
+                Directory.CreateDirectory("./CustomAudio");
+            if (!Directory.Exists("CustomAudio/Hits"))
+                Directory.CreateDirectory("./CustomAudio/Hits");
+            if (!Directory.Exists("CustomAudio/Misses"))
+                Directory.CreateDirectory("./CustomAudio/Misses");
+            if (!Directory.Exists("CustomAudio/Music"))
+                Directory.CreateDirectory("./CustomAudio/Music");
+            if (!Directory.Exists("CustomAudio/Fireworks"))
+                Directory.CreateDirectory("./CustomAudio/Fireworks");
+            if (!Directory.Exists("CustomAudio/Saber"))
+                Directory.CreateDirectory("./CustomAudio/Saber");
+
+            //TODO: Accuracy Categories
+            // eg: 115_ hits assign SuperHit.ogg, 80-100 hits assign GoodHit.ogg, etc
+            Log("Reading Custom Hit Sounds");
+
+            string[] exts = { "ogg", "wav", "mp3" };
+
+            if (!LoadSounds(exts, SoundCategory.Hit))
+                Log("No Hit SFX found");
+            else
+                Log("Loaded Hit SFX");
+            if (!LoadSounds(exts, SoundCategory.Miss))
+                Log("No Miss SFX found");
+            else
+                Log("Loaded Miss SFX");
+            if (!LoadSounds(exts, SoundCategory.Music))
+                Log("No Music found");
+            else
+                Log("Loaded Music");
+            if (!LoadSounds(exts, SoundCategory.Fireworks))
+                Log("No Fireworks SFX found");
+            else
+                Log("Loaded Fireworks SFX");
+            if (!LoadSounds(exts, SoundCategory.Saber))
+                Log("No Saber SFX found");
+            else
+                Log("Loaded Saber SFX");
+            if (!LoadSounds(exts, SoundCategory.Clash))
+                Log("No Saber Clash FX found");
+            else
+                Log("Loaded Saber Clash SFX");
+
+            HitSoundPicker = new RandomObjectPicker<AudioClip>(HitSounds.ToArray(), 0.0f);
+            MissSoundPicker = new RandomObjectPicker<AudioClip>(MissSounds.ToArray(), 0.0f);
+            BGMusicPicker = new RandomObjectPicker<AudioClip>(BGMusic.ToArray(), cfg.minMusicTime);
+            FireworkSFXPicker = new RandomObjectPicker<AudioClip>(FireworksFX.ToArray(), 0.0f);
+            SaberClashPicker = new RandomObjectPicker<AudioClip>(SaberClashFX.ToArray(), 0.0f);
         }
 
 
         protected static void LoadModConfiguration() {
+            if (!Directory.Exists("./UserData/AudioModifiers")) {
+                Log("Creating Config Folder");
+                Directory.CreateDirectory("./UserData/AudioModifiers");
+            }
+
             if (!File.Exists(cfgFilePath)) {
                 Log("Writing default Audio Modifiers Configuration");
-                if (!Directory.Exists("./Config")) {
-                    Log("Creating Config Folder");
-                    Directory.CreateDirectory("./Config");
-                }
 
                 if (AudioModifiersPlugin.cfg == null)
                     AudioModifiersPlugin.cfg = new ModConfiguration();
 
                 File.WriteAllText(cfgFilePath, AudioModifiersPlugin.cfg.ToString(), System.Text.Encoding.ASCII);
             } else {
+                Log("Loading Mod Configuration");
                 AudioModifiersPlugin.cfg = ModConfiguration.FromJson(File.ReadAllText(cfgFilePath));
-                Log(AudioModifiersPlugin.cfg.ToString());
+            }
+
+            if(AudioModifiersPlugin.cfg == null) {
+                Log("!!! Unable to load Configuration !!!");
+            } else {
+                Log("Mod Configuration Loaded");
             }
         }
 
         #region Unity Hooks
         public void OnApplicationStart() {
             LoadModConfiguration();
-
+            
+            /*
             //Log("Hooking into activeSceneChanged");
             SceneManager.activeSceneChanged += SceneManagerOnActiveSceneChanged;
             //Log("Hooking into SceneLoaded");
-            SceneManager.sceneLoaded += SceneManager_sceneLoaded;
+            SceneManager.sceneLoaded += OnSceneLoaded;
+            */
 
             //Log("Creating Harmony Instance " + strHarmonyInstance);
-            if((harmony = HarmonyInstance.Create(strHarmonyInstance)) != null)
+            if ((harmony = HarmonyInstance.Create(strHarmonyInstance)) != null) {
                 ApplyPatches();
-
-            //TODO: Load Random Sounds into Assets
-            LoadHitSounds();
+                LoadCustomSounds();
+            }
+        }
+        
+        void IBeatSaberPlugin.OnSceneLoaded(Scene scene, LoadSceneMode sceneMode) {
+            //Log(scene.name + " scene loaded " + sceneMode.ToString());
         }
 
-        private void SceneManagerOnActiveSceneChanged(Scene arg0, Scene arg1) {
-            //Log("Active Scene Changed: " + arg0.name + " to " + arg1.name);
-
-        }
-
-        private void SceneManager_sceneLoaded(Scene arg0, LoadSceneMode arg1) {
-            //Log("Scene Loaded: " + arg0.name + " " + arg1.ToString());
-        }
-
-        public void OnApplicationQuit() {
+        void IBeatSaberPlugin.OnApplicationQuit() {
             Log("Removing Hooks");
-            SceneManager.activeSceneChanged -= SceneManagerOnActiveSceneChanged;
-            SceneManager.sceneLoaded -= SceneManager_sceneLoaded;
+            //SceneManager.activeSceneChanged -= SceneManagerOnActiveSceneChanged;
+            //SceneManager.sceneLoaded -= OnSceneLoaded;
 
             if (writeLogOnExit)
                 File.WriteAllText(logFilePath, LogFileData, System.Text.Encoding.ASCII);
@@ -265,11 +313,6 @@ namespace AudioModifiers {
                     cfg.EnableCustomSounds = !cfg.EnableCustomSounds;
                 }
 
-                if (Input.GetKeyDown(KeyCode.P)) {
-                    //Toggle Random Pitch
-                    cfg.UseRandomPitch = !cfg.UseRandomPitch;
-                }
-
                 if (Input.GetKeyDown(KeyCode.KeypadMultiply)) {
                     cfg.DisableFireworks = !cfg.DisableFireworks;
                 }
@@ -278,11 +321,225 @@ namespace AudioModifiers {
 
         public void OnFixedUpdate() {
         }
-
-        public void OnLevelWasLoaded(int level) {
+        
+        void IBeatSaberPlugin.OnSceneUnloaded(Scene scene) {
         }
 
-        public void OnLevelWasInitialized(int level) {
+        protected void AddSwordSound(GameObject saber, AudioClip clip, float volume) {
+            //Log("Assigning " + saber.name + " Audio \"" + clip.name + "\" " + volume + "");
+
+            //Create an object to track the tip of the saber
+            Transform tTip = saber.transform.Find("tip");
+            if (tTip == null) {
+                //Log(saber.name + " adding tip object");
+                tTip = new GameObject("tip").transform;
+                tTip.transform.SetParent(saber.transform);
+                tTip.localPosition = new Vector3(0.0f, 0.0f, 1.0f);
+
+                /* Test Sphere
+                GameObject ts = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                ts.transform.SetParent(tTip);
+                ts.transform.localPosition = Vector3.zero;
+                ts.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+                */
+            } else {
+                //Log(saber.name + " tip found");
+            }
+
+            //Log("Checking for existing SwordSound");
+            SwordSound ss = null;
+            if ((ss = saber.GetComponent<SwordSound>()) != null) {
+                //Log("Already has SwordSound");
+            } else {
+                //Log("Adding Sword Sound to " + saber.name);
+                ss = saber.AddComponent<SwordSound>();
+            }
+
+            //Create an object to track the tip of the saber
+            ss._prevPoint = ss._swordPoint.position;
+            ss._swordPoint = tTip;
+
+            ss._upSmooth = AudioModifiersPlugin.cfg.SpeedupSmoothing;
+            ss._downSmooth = AudioModifiersPlugin.cfg.SlowdownSmoothing;
+
+            ss._speedMultiplier = AudioModifiersPlugin.cfg.SpeedMultiplier;
+
+            ss._audioSource = saber.GetComponent<AudioSource>();
+            if (ss._audioSource == null) {
+                //Log("Adding AudioSource to SwordSound");
+                ss._audioSource = saber.AddComponent<AudioSource>();
+            } else {
+                //Log("AudioSource already exists, not adding");
+            }
+
+            ss._audioSource.playOnAwake = false;
+            //Log(saber.name + " Setting Clip Loop");
+            ss._audioSource.loop = true;
+            //Log(saber.name + " Setting Clip Doppler");
+            ss._audioSource.dopplerLevel = 0.5f;
+            //Log(saber.name + " Setting Clip Spatialize");
+            ss._audioSource.spatialize = true;
+            //Log(saber.name + " Setting Clip Spatial Blend");
+            ss._audioSource.spatialBlend = 1.0f;
+            //Log(saber.name + " Setting Clip Minimum Distance");
+            ss._audioSource.minDistance = 0.01f;
+            //Log(saber.name + " Setting Clip Maximum Distance");
+            ss._audioSource.maxDistance = 100.0f;
+            //Log(saber.name + " Setting Clip Volume");
+            ss._audioSource.volume = volume;
+
+            if(ss._pitchBySpeedCurve == null) {
+                //Log(saber.name + " Adding Pitch-by-Speed Curve");
+                ss._pitchBySpeedCurve = new AnimationCurve();
+            }
+
+            if (ss._pitchBySpeedCurve.length == 0) {
+                //Log(saber.name + " Setting Clip Pitch-By-Speed Curve");
+                ss._pitchBySpeedCurve.AddKey(0, 1.0f);
+                ss._pitchBySpeedCurve.AddKey(0.5f, 0.95f);
+                ss._pitchBySpeedCurve.AddKey(1.0f, 0.9f);
+            } else {
+                //Log(saber.name + " Clip Pitch-By-Speed Curve already Present");
+            }
+
+            if (ss._gainBySpeedCurve == null) {
+                //Log(saber.name + " Adding Gain-by-Speed Curve");
+                ss._gainBySpeedCurve = new AnimationCurve();
+            }
+
+            if (ss._gainBySpeedCurve.length == 0) {
+                //Log(saber.name + " Setting Clip Gain-By-Speed Curve");
+                ss._gainBySpeedCurve.AddKey(0, 0.85f);
+                ss._gainBySpeedCurve.AddKey(0.5f, 0.95f);
+                ss._gainBySpeedCurve.AddKey(1.0f, 1.0f);
+            } else {
+                //Log(saber.name + " Clip Gain-By-Speed Curve already Present");
+            }
+
+            if (clip.loadState == AudioDataLoadState.Unloaded)
+                clip.LoadAudioData();
+
+            //Log(saber.name + " Setting Source Clip");
+            ss._audioSource.clip = clip;// AudioModifiersPlugin.SaberWhoosh[UnityEngine.Random.Range(0, AudioModifiersPlugin.SaberWhoosh.Count)];
+            //Log(saber.name + " Activating");
+            ss._audioSource.Play();
+            Log(saber.name + " Saber Sound Active");
+        }
+
+        protected void AssignSaberSounds(Scene scene) {
+            if(cfg == null) {
+                Log("CFG Has not been loaded yet!");
+                return;
+            }
+
+            if (AudioModifiersPlugin.SaberWhoosh.Count <= 0) {
+                Log("No Saber Sounds found");
+                return;
+            }
+
+            GameObject gameCore = scene.GetRootGameObjects().FirstOrDefault(); //"GameCore" "Saber Loader"
+
+            #region DEBUG
+            /* Spit out GameCore Hierarchy 4 levels deep
+            Transform tC, ttC, tttC, ttttC;
+            for(int c = 0; c < gameCore.transform.childCount; c++) {
+                tC = gameCore.transform.GetChild(c);
+                Log("  " + tC.gameObject.name);
+
+                if (tC.childCount > 0) {
+                    for (int cc = 0; cc < tC.childCount; cc++) {
+                        ttC = tC.GetChild(cc);
+                        Log("   " + ttC.gameObject.name);
+
+                        if (ttC.childCount > 0) {
+                            for (int ccc = 0; ccc < ttC.childCount; ccc++) {
+                                tttC = ttC.GetChild(ccc);
+                                Log("    " + tttC.gameObject.name);
+
+                                if(tttC.childCount > 0) {
+                                    for(int cccc = 0; cccc < tttC.childCount; cccc++) {
+                                        ttttC = tttC.GetChild(cccc);
+                                        Log("     " + tttC.gameObject.name);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            */
+            #endregion
+
+            //Get Both Sabers
+            Transform tVRGameCore = gameCore.transform.Find("Origin").Find("VRGameCore");
+            
+            GameObject objLeftSaber = tVRGameCore.Find("LeftSaber").gameObject;//GameObject.Find("ControllerLeft"); //tLeft.gameObject; 
+            Log("Left Saber " + ((objLeftSaber != null) ? "found" : "not found"));
+
+            if(cfg.LeftWhoosh && objLeftSaber != null) {
+                if (AudioModifiersPlugin.SaberWhoosh.Count > 0) {
+                    AudioClip clip = AudioModifiersPlugin.SaberWhoosh[UnityEngine.Random.Range(0, AudioModifiersPlugin.SaberWhoosh.Count)];
+                    if (clip != null) {
+                        AddSwordSound(objLeftSaber, clip, AudioModifiersPlugin.cfg.LeftVolume);
+                    } else {
+                        Log(objLeftSaber.name + " Saber Audio Clip is null");
+                    }
+                } else {
+                    Log("No Saber Whoosh Sounds");
+                }
+            }
+
+            GameObject objRightSaber = tVRGameCore.Find("RightSaber").gameObject;//GameObject.Find("ControllerRight"); //tRight.gameObject
+            Log("Right Saber " + ((objRightSaber != null) ? "found" : "not found"));
+            if (cfg.RightWhoosh && objRightSaber != null) {
+                if (AudioModifiersPlugin.SaberWhoosh.Count > 0) {
+                    AudioClip clip = AudioModifiersPlugin.SaberWhoosh[UnityEngine.Random.Range(0, AudioModifiersPlugin.SaberWhoosh.Count)];
+                    if (clip != null) {
+                        AddSwordSound(objRightSaber, clip, AudioModifiersPlugin.cfg.RightVolume);
+                    } else {
+                        Log(objRightSaber.name + " Saber Audio Clip is null");
+                    }
+                } else {
+                    Log("No Saber Whoosh Sounds");
+                }
+            }
+
+            //Add Clash Effect Sounds
+            Transform tSaberClash = gameCore.transform.Find("SaberClashEffect");
+            if (tSaberClash == null) {
+                Log("Unable to locate SaberClashEffect");
+            } else {
+                GameObject objClashEffect = tSaberClash.gameObject;
+
+                AudioSource srcClash = objClashEffect.GetComponent<AudioSource>();
+                if (srcClash == null) {
+                    Log("Adding AudioSource to Clash Effect");
+                    srcClash = objClashEffect.AddComponent<AudioSource>();
+                } else {
+                    Log("Clash Effect AudioSource already exists, not adding");
+                }
+
+                if (srcClash != null)
+                    ClashSource = srcClash;
+            }
+        }
+
+        bool playingSong = false;
+        bool enteringMenu = false;
+        void IBeatSaberPlugin.OnActiveSceneChanged(Scene prevScene, Scene nextScene) {
+            //Log("Active Scene Changed from " + prevScene.name + " to " + nextScene.name);
+
+            playingSong = (nextScene.name == "GameCore");
+            enteringMenu = (prevScene.name == "MenuEnvironment" && nextScene.name == "MenuCore");
+
+            if (playingSong) {
+                Log("Playing Song");
+                AssignSaberSounds(nextScene);
+            }
+
+            if (enteringMenu) {
+                Log("Entering Main Menu");
+            }
         }
         #endregion
     }
