@@ -434,7 +434,7 @@ namespace AudioModifiers {
             if (clip.loadState == AudioDataLoadState.Unloaded)
                 clip.LoadAudioData();
 
-            ss._audioSource.bypassEffects = true;
+            //ss._audioSource.bypassEffects = true;
 
             Log(saber.name + " Setting Source Clip");
             ss._audioSource.clip = clip;// AudioModifiersPlugin.SaberWhoosh[UnityEngine.Random.Range(0, AudioModifiersPlugin.SaberWhoosh.Count)];
@@ -554,6 +554,26 @@ namespace AudioModifiers {
                 if (srcClash == null) {
                     Log("Adding AudioSource to Clash Effect");
                     srcClash = objClashEffect.AddComponent<AudioSource>();
+
+                    srcClash.playOnAwake = true;
+                    //Log(saber.name + " Setting Clip Loop");
+                    srcClash.loop = true;
+                    //Log(saber.name + " Setting Clip Doppler");
+                    srcClash.dopplerLevel = 1.0f;
+                    //Log(saber.name + " Setting Clip Spatialize");
+                    srcClash.spatialize = true;
+                    //Log(saber.name + " Setting Clip Spatial Blend");
+                    srcClash.spatialBlend = 1.0f;
+                    //Log(saber.name + " Setting Clip Minimum Distance");
+                    srcClash.minDistance = 0.01f;
+                    //Log(saber.name + " Setting Clip Maximum Distance");
+                    srcClash.maxDistance = 100.0f;
+                    //Log(saber.name + " Setting Clip Volume");
+                    srcClash.volume = 0.0f; //Start volume off so it doesn't BVZZRRTTPFFTTT
+                                            //Log(saber.name + " Setting Clip Priority");
+                    srcClash.priority = 32;
+                    //Log(saber.name + " Setting Clip Rolloff Mode");
+                    srcClash.rolloffMode = AudioRolloffMode.Logarithmic;
                 } else {
                     Log("Clash Effect AudioSource already exists, not adding");
                 }
@@ -582,7 +602,8 @@ namespace AudioModifiers {
 
             if (playingSong) {
                 Log("Playing Song");
-                AssignSaberSounds(nextScene);
+                if(AudioModifiersPlugin.cfg.EnableCustomSounds)
+                    AssignSaberSounds(nextScene);
             }
 
             if (enteringMenu) {

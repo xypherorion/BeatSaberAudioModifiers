@@ -12,8 +12,10 @@ namespace AudioModifiers {
     [HarmonyPatch("NoteWasCut", MethodType.Normal)]
     public class HitSoundsPatch {
         public static bool Prefix(ref NoteCutSoundEffect __instance, NoteController noteController, NoteCutInfo noteCutInfo, ref RandomObjectPicker<AudioClip> ____badCutRandomSoundPicker, ref NoteData ____noteData, ref bool ____noteWasCut, ref bool ____goodCut, ref bool ____handleWrongSaberTypeAsGood, ref AudioSource ____audioSource, ref double ____endDSPtime, ref float ____badCutVolume, ref float ____goodCutVolume) {
-            if (AudioModifiersPlugin.cfg.EnableCustomSounds && AudioModifiersPlugin.MissSoundPicker != null && AudioModifiersPlugin.HitSoundPicker != null) {
+            if (!AudioModifiersPlugin.cfg.EnableCustomSounds)
+                return true;
 
+            if(AudioModifiersPlugin.MissSoundPicker != null && AudioModifiersPlugin.HitSoundPicker != null) {
                 if (noteController.noteData.id != ____noteData.id)
                     return false;
 
@@ -48,10 +50,8 @@ namespace AudioModifiers {
                     ____audioSource.Play();
                 }
                 __instance.transform.position = noteCutInfo.cutPoint;
-
-                return false;
             }
-            return true;
+            return false;
 
             /*
             if (AudioModifiersPlugin.cfg.EnableCustomSounds) {
