@@ -9,6 +9,9 @@ using UnityEngine.UI;
 using UnityEngine.Networking;
 using Harmony;
 
+//TODO: Select Hit sounds based on score ranges
+//Hit Score Visualizer for reference
+
 namespace AudioModifiers {
     public class AudioModifiersPlugin : IBeatSaberPlugin {
         public enum SoundCategory {
@@ -22,7 +25,7 @@ namespace AudioModifiers {
         }
 
         public string Name => "AudioModifiers";
-        public string Version => "1.1.0.0";
+        public string Version => "1.1.0.1";
 
         public bool writeLogOnExit = true;
         public static string logFilePath = "./UserData/AudioModifiers/AudioModifiers.log";
@@ -49,7 +52,7 @@ namespace AudioModifiers {
         public static ModConfiguration cfg = null;
 
         public static void Log(string message) {
-            Console.WriteLine("[{0}] {1}", "AudioModifiers", message);
+            Console.WriteLine("[AudioModifiers] {0}", message);
             LogFileData += message + '\n';
         }
 
@@ -165,19 +168,17 @@ namespace AudioModifiers {
                                     webRequest.SendWebRequest();
                                     while (!webRequest.isDone) { }
 
-                                    if(webRequest.isHttpError || webRequest.isHttpError) {
+                                    if (webRequest.isHttpError || webRequest.isHttpError) {
                                         Log("Unable to add " + AudioFiles[f] + " to " + category.ToString() + " Sounds");
                                     } else {
                                         clip = DownloadHandlerAudioClip.GetContent(webRequest);
                                         if (clip == null) {
                                             Log(AudioFiles[f] + " Clip is NULL");
                                             continue;
-                                        }
-                                        //clip.name = AudioFiles[f];
-
-                                        else if (!clip.LoadAudioData()) {
+                                        } else if (!clip.LoadAudioData()) {
                                             Log("Unable to Load clip audio data " + clip.name);
                                         } else {
+                                            clip.name = AudioFiles[f];
                                             ClipCategory.Add(clip);
                                             Log("Added " + AudioFiles[f] + " to " + category.ToString() + " Sounds");
                                         }
@@ -306,8 +307,8 @@ namespace AudioModifiers {
         }
 
         public void OnUpdate() {
+            /*
             if((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))) {
-                //Holding Shift
                 if (Input.GetKeyDown(KeyCode.O)) {
                     //Toggle Random Sounds
                     cfg.EnableCustomSounds = !cfg.EnableCustomSounds;
@@ -317,6 +318,7 @@ namespace AudioModifiers {
                     cfg.DisableFireworks = !cfg.DisableFireworks;
                 }
             }
+            */
         }
 
         public void OnFixedUpdate() {
@@ -326,57 +328,66 @@ namespace AudioModifiers {
         }
 
         protected void AddSwordSound(GameObject saber, AudioClip clip, float volume) {
-            //Log("Assigning " + saber.name + " Audio \"" + clip.name + "\" " + volume + "");
+            if (saber == null) {
+                Log("Saber is null!");
+                return;
+            }
+
+            if (clip == null) {
+                Log("Clip is null!");
+                return;
+            }
+
+            Log("Assigning " + saber.name + " Audio \"" + clip.name + "\" " + volume + "");
 
             //Create an object to track the tip of the saber
             Transform tTip = saber.transform.Find("tip");
             if (tTip == null) {
-                //Log(saber.name + " adding tip object");
+                Log(saber.name + " adding tip object");
                 tTip = new GameObject("tip").transform;
                 tTip.transform.SetParent(saber.transform);
                 tTip.localPosition = new Vector3(0.0f, 0.0f, 1.0f);
 
-                /* Test Sphere
-                GameObject ts = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                ts.transform.SetParent(tTip);
-                ts.transform.localPosition = Vector3.zero;
-                ts.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-                */
+                if (cfg.showDebugSpheres) {
+                    GameObject ts = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    ts.transform.SetParent(tTip);
+                    ts.transform.localPosition = Vector3.zero;
+                    ts.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+                }
             } else {
-                //Log(saber.name + " tip found");
+                Log(saber.name + " tip found");
             }
 
-            //Log("Checking for existing SwordSound");
+            Log("Checking for existing SwordSound");
             SwordSound ss = null;
             if ((ss = saber.GetComponent<SwordSound>()) != null) {
-                //Log("Already has SwordSound");
+                Log("Already has SwordSound");
             } else {
-                //Log("Adding Sword Sound to " + saber.name);
+                Log("Adding Sword Sound to " + saber.name);
                 ss = saber.AddComponent<SwordSound>();
             }
 
             //Create an object to track the tip of the saber
-            ss._prevPoint = ss._swordPoint.position;
             ss._swordPoint = tTip;
+            ss._prevPoint = ss._swordPoint.position;
 
             ss._upSmooth = AudioModifiersPlugin.cfg.SpeedupSmoothing;
             ss._downSmooth = AudioModifiersPlugin.cfg.SlowdownSmoothing;
-
             ss._speedMultiplier = AudioModifiersPlugin.cfg.SpeedMultiplier;
 
             ss._audioSource = saber.GetComponent<AudioSource>();
             if (ss._audioSource == null) {
-                //Log("Adding AudioSource to SwordSound");
+                Log("Adding AudioSource to SwordSound");
                 ss._audioSource = saber.AddComponent<AudioSource>();
             } else {
-                //Log("AudioSource already exists, not adding");
+                Log("AudioSource already exists, not adding");
             }
 
-            ss._audioSource.playOnAwake = false;
+            ss._audioSource.playOnAwake = true;
             //Log(saber.name + " Setting Clip Loop");
             ss._audioSource.loop = true;
             //Log(saber.name + " Setting Clip Doppler");
-            ss._audioSource.dopplerLevel = 0.5f;
+            ss._audioSource.dopplerLevel = 1.0f;
             //Log(saber.name + " Setting Clip Spatialize");
             ss._audioSource.spatialize = true;
             //Log(saber.name + " Setting Clip Spatial Blend");
@@ -386,7 +397,11 @@ namespace AudioModifiers {
             //Log(saber.name + " Setting Clip Maximum Distance");
             ss._audioSource.maxDistance = 100.0f;
             //Log(saber.name + " Setting Clip Volume");
-            ss._audioSource.volume = volume;
+            ss._audioSource.volume = 0.0f; //Start volume off so it doesn't BVZZRRTTPFFTTT
+            //Log(saber.name + " Setting Clip Priority");
+            ss._audioSource.priority = 32;
+            //Log(saber.name + " Setting Clip Rolloff Mode");
+            ss._audioSource.rolloffMode = AudioRolloffMode.Logarithmic;
 
             if(ss._pitchBySpeedCurve == null) {
                 //Log(saber.name + " Adding Pitch-by-Speed Curve");
@@ -399,7 +414,7 @@ namespace AudioModifiers {
                 ss._pitchBySpeedCurve.AddKey(0.5f, 0.95f);
                 ss._pitchBySpeedCurve.AddKey(1.0f, 0.9f);
             } else {
-                //Log(saber.name + " Clip Pitch-By-Speed Curve already Present");
+                Log(saber.name + " Clip Pitch-By-Speed Curve already Present");
             }
 
             if (ss._gainBySpeedCurve == null) {
@@ -413,15 +428,16 @@ namespace AudioModifiers {
                 ss._gainBySpeedCurve.AddKey(0.5f, 0.95f);
                 ss._gainBySpeedCurve.AddKey(1.0f, 1.0f);
             } else {
-                //Log(saber.name + " Clip Gain-By-Speed Curve already Present");
+                Log(saber.name + " Clip Gain-By-Speed Curve already Present");
             }
 
             if (clip.loadState == AudioDataLoadState.Unloaded)
                 clip.LoadAudioData();
 
-            //Log(saber.name + " Setting Source Clip");
+            ss._audioSource.bypassEffects = true;
+
+            Log(saber.name + " Setting Source Clip");
             ss._audioSource.clip = clip;// AudioModifiersPlugin.SaberWhoosh[UnityEngine.Random.Range(0, AudioModifiersPlugin.SaberWhoosh.Count)];
-            //Log(saber.name + " Activating");
             ss._audioSource.Play();
             Log(saber.name + " Saber Sound Active");
         }
@@ -470,10 +486,27 @@ namespace AudioModifiers {
             */
             #endregion
 
+            Transform tOrigin = gameCore.transform.Find("Origin");
+
+            if(tOrigin == null) {
+                Log("Unable to locate Origin");
+                return;
+            }
+
+            Transform tVRGameCore = tOrigin.Find("VRGameCore");
+            if(tVRGameCore == null) {
+                Log("Unable to locate GameCore");
+                return;
+            }
+
             //Get Both Sabers
-            Transform tVRGameCore = gameCore.transform.Find("Origin").Find("VRGameCore");
-            
-            GameObject objLeftSaber = tVRGameCore.Find("LeftSaber").gameObject;//GameObject.Find("ControllerLeft"); //tLeft.gameObject; 
+            Transform tSaber = tVRGameCore.Find("LeftSaber");
+            if(tSaber == null) {
+                Log("Unable to locate LeftSaber");
+                return;
+            }
+
+            GameObject objLeftSaber = tSaber.gameObject;
             Log("Left Saber " + ((objLeftSaber != null) ? "found" : "not found"));
 
             if(cfg.LeftWhoosh && objLeftSaber != null) {
@@ -489,7 +522,13 @@ namespace AudioModifiers {
                 }
             }
 
-            GameObject objRightSaber = tVRGameCore.Find("RightSaber").gameObject;//GameObject.Find("ControllerRight"); //tRight.gameObject
+            tSaber = tVRGameCore.Find("RightSaber");
+            if(tSaber == null) {
+                Log("Unable to locate RightSaber");
+                return;
+            }
+
+            GameObject objRightSaber = tSaber.gameObject;//GameObject.Find("ControllerRight"); //tRight.gameObject
             Log("Right Saber " + ((objRightSaber != null) ? "found" : "not found"));
             if (cfg.RightWhoosh && objRightSaber != null) {
                 if (AudioModifiersPlugin.SaberWhoosh.Count > 0) {
@@ -519,8 +558,17 @@ namespace AudioModifiers {
                     Log("Clash Effect AudioSource already exists, not adding");
                 }
 
-                if (srcClash != null)
+                if (srcClash != null) {
                     ClashSource = srcClash;
+
+                    if (cfg.showDebugSpheres && (objClashEffect.transform.Find("debugSphere") == null)) {
+                        GameObject ts = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                        ts.name = "debugSphere";
+                        ts.transform.SetParent(objClashEffect.transform);
+                        ts.transform.localPosition = Vector3.zero;
+                        ts.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+                    }
+                }
             }
         }
 

@@ -15,13 +15,14 @@ namespace AudioModifiers {
         public float LeftVolume = 1.0f;
         public bool RightWhoosh = true;
         public float RightVolume = 1.0f;
-        public float PitchRange = 0.1f;
-        public float SpeedMultiplier = 0.05f;
-        public float SpeedupSmoothing = 4f;
-        public float SlowdownSmoothing = 4f;
+        public float PitchRange = 0.15f;
+        public float SpeedMultiplier = 1.0f; //0.05f
+        public float SpeedupSmoothing = 1.0f; //4.0f
+        public float SlowdownSmoothing = 1.0f; //4.0f
         public bool ClashFX = true;
-        public float ClashVolume = 0.5f;
+        public float ClashVolume = 1.0f;
         public float minMusicTime = 0.0f;
+        public bool showDebugSpheres = false;
 
         public static ModConfiguration FromJson(string json) {
             return JsonUtility.FromJson<ModConfiguration>(json);

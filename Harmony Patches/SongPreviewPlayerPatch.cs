@@ -12,7 +12,7 @@ namespace AudioModifiers.Harmony_Patches {
         [HarmonyPatch("CrossfadeToDefault", MethodType.Normal)]
         public class SongPreviewPlayerCrossfadeToDefaultPatch {
             public static bool Prefix(ref SongPreviewPlayer __instance, ref AudioClip ____defaultAudioClip) {
-                if(AudioModifiersPlugin.BGMusic.Count > 0)
+                if (AudioModifiersPlugin.BGMusic.Count > 0)
                     ____defaultAudioClip = AudioModifiersPlugin.BGMusicPicker.PickRandomObject();
                 return true;
             }

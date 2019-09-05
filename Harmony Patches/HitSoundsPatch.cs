@@ -19,7 +19,8 @@ namespace AudioModifiers {
 
                 ____noteWasCut = true;
 
-                if ((!____handleWrongSaberTypeAsGood && !noteCutInfo.allIsOK) || (____handleWrongSaberTypeAsGood && (!noteCutInfo.allExceptSaberTypeIsOK || noteCutInfo.saberTypeOK))) {
+                if ((!____handleWrongSaberTypeAsGood && !noteCutInfo.allIsOK) ||
+                    (____handleWrongSaberTypeAsGood && (!noteCutInfo.allExceptSaberTypeIsOK || noteCutInfo.saberTypeOK))) {
                     if (AudioModifiersPlugin.MissSounds.Count > 0) {
                         AudioClip clip = AudioModifiersPlugin.MissSoundPicker.PickRandomObject();
                         ____audioSource.clip = clip;
@@ -32,6 +33,8 @@ namespace AudioModifiers {
                     ____endDSPtime = AudioSettings.dspTime + (double)____audioSource.clip.length + 0.10000000149011612;
                 } else {
                     if (AudioModifiersPlugin.HitSounds.Count > 0) {
+                        //TODO: Detect hits and switch to different sound pickers
+
                         AudioClip clip = AudioModifiersPlugin.HitSoundPicker.PickRandomObject();
                         ____audioSource.clip = clip;
                     }
