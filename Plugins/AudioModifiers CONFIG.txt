@@ -1,0 +1,54 @@
+AudioModifiers 1.1.3.0 CONFIG
+By Xypher Orion
+
+Run Beat Saber once to generate the default config file
+BeatSaber/UserData/AudioModifiers/AudioModifiers.json
+
+EnableCustomSounds
+true Enables custom sounds
+false Disables custom sounds
+
+DisableFireworks
+true Disables fireworks explosions
+false Enables fireworks explosions
+
+ClashFX
+true Enables custom clash sounds
+false Disables custom clash sounds
+
+ClashVolume
+0.0 - 1.0 sets the maximum volume of the Clash effect
+
+LeftWhoosh
+true Enables the Left Saber drone/whoosh effect
+false Disables the Left Saber drone/whoosh effect
+
+LeftVolume
+0.0 to 1.0 sets the maximum volume of the Left Saber drone/whoosh effect
+
+RightWhoosh
+true Enables the Right Saber drone/whoosh effect
+false Disables the Right Saber drone/whoosh effect
+
+RightVolume
+0.0 to 1.0 sets the maximum volume of the Right Saber drone/whoosh effect
+
+PitchRange
+0.0 to 1.0 sets the variance of the pitch for Hit sound effects
+
+SpeedMultiplier
+0.0 to 1.0 sets the easing factor for Left and Right drone/whoosh effect
+
+SpeedupSmoothing
+0.0 - 100.0 sets the acceleration smoothing factor for Left and Right drone/whoosh effect
+
+SlowdownSmoothing
+0.0 - 100.0 sets the deceleration smoothing factor for Left and Right drone/whoosh effect
+
+minMusicTime
+0.0 - ?.?? sets the minimum amount of time a custom menu music file will be played before it is allowed to be switched
+
+DEBUGGING
+showDebugSpheres
+true Shows the positions of both saber tips and clash effect
+false Hides the positions of both saber tips and clash effect

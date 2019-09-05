@@ -23,10 +23,8 @@ namespace AudioModifiers {
 
                 if ((!____handleWrongSaberTypeAsGood && !noteCutInfo.allIsOK) ||
                     (____handleWrongSaberTypeAsGood && (!noteCutInfo.allExceptSaberTypeIsOK || noteCutInfo.saberTypeOK))) {
-                    if (AudioModifiersPlugin.MissSounds.Count > 0) {
-                        AudioClip clip = AudioModifiersPlugin.MissSoundPicker.PickRandomObject();
-                        ____audioSource.clip = clip;
-                    }
+                    if (AudioModifiersPlugin.MissSounds.Count > 0)
+                        ____audioSource.clip = AudioModifiersPlugin.MissSoundPicker.PickRandomObject();
 
                     ____audioSource.time = 0f;
                     ____audioSource.Play();
@@ -34,17 +32,14 @@ namespace AudioModifiers {
                     ____audioSource.volume = ____badCutVolume;
                     ____endDSPtime = AudioSettings.dspTime + (double)____audioSource.clip.length + 0.10000000149011612;
                 } else {
-                    if (AudioModifiersPlugin.HitSounds.Count > 0) {
-                        //TODO: Detect hits and switch to different sound pickers
-
-                        AudioClip clip = AudioModifiersPlugin.HitSoundPicker.PickRandomObject();
-                        ____audioSource.clip = clip;
-                    }
+                    //TODO: Detect hits and switch to different sound pickers
+                    if (AudioModifiersPlugin.HitSounds.Count > 0)
+                        ____audioSource.clip = AudioModifiersPlugin.HitSoundPicker.PickRandomObject();
 
                     ____audioSource.time = 0f;
                     //____endDSPtime = AudioSettings.dspTime + (double)____audioSource.clip.length + 0.10000000149011612;
 
-                    ____audioSource.pitch = UnityEngine.Random.Range(0.9f, 1.2f);
+                    ____audioSource.pitch = UnityEngine.Random.Range(1.0f - (AudioModifiersPlugin.cfg.PitchRange * 0.5f), 1.0f + (AudioModifiersPlugin.cfg.PitchRange * 0.5f));
                     ____goodCut = true;
                     ____audioSource.volume = ____goodCutVolume;
                     ____audioSource.Play();
