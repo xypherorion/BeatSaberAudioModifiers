@@ -1,4 +1,4 @@
-AudioModifiers 1.1.4.0 CONFIG
+AudioModifiers 1.1.7.0 CONFIG
 By Xypher Orion
 
 Run Beat Saber once to generate the default config file

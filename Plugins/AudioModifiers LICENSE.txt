@@ -1,5 +1,5 @@
-WobbleSaber 1.1.4.0 LICENSE
-Copyright 2019 Kevin W. Gerber "Xypher Orion"
+WobbleSaber 1.1.7.0 LICENSE
+Copyright 2019-2020 Kevin W. Gerber "Xypher Orion"
 xypher.orion@gmail.com
 http://www.twitch.tv/xypherorion
 

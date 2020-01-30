@@ -251,9 +251,9 @@ namespace AudioModifiers {
 
 
         protected static void LoadModConfiguration() {
-            if (!Directory.Exists("./UserData/AudioModifiers")) {
+            if (!Directory.Exists($"./UserData/{Name}")) {
                 Log("Creating Config Folder");
-                Directory.CreateDirectory("./UserData/AudioModifiers");
+                Directory.CreateDirectory($"./UserData/{Name}");
             }
 
             if (!File.Exists(cfgFilePath)) {
@@ -395,7 +395,7 @@ namespace AudioModifiers {
             //Log(saber.name + " Setting Clip Minimum Distance");
             ss._audioSource.minDistance = 0.1f;
             //Log(saber.name + " Setting Clip Maximum Distance");
-            ss._audioSource.maxDistance = 1000.0f;
+            ss._audioSource.maxDistance = 50.0f;
             //Log(saber.name + " Setting Clip Volume");
             ss._audioSource.volume = 0.0f; //Start volume off so it doesn't BVZZRRTTPFFTTT
             //Log(saber.name + " Setting Clip Priority");
@@ -412,7 +412,7 @@ namespace AudioModifiers {
                 //Log(saber.name + " Setting Clip Pitch-By-Speed Curve");
                 ss._pitchBySpeedCurve.AddKey(0, 1.0f);
                 ss._pitchBySpeedCurve.AddKey(0.5f, 0.95f);
-                ss._pitchBySpeedCurve.AddKey(1.0f, 0.9f);
+                ss._pitchBySpeedCurve.AddKey(1.0f, 0.875f);
             } else {
                 Log(saber.name + " Clip Pitch-By-Speed Curve already Present");
             }
@@ -567,7 +567,7 @@ namespace AudioModifiers {
                     //Log(saber.name + " Setting Clip Minimum Distance");
                     srcClash.minDistance = 0.1f;
                     //Log(saber.name + " Setting Clip Maximum Distance");
-                    srcClash.maxDistance = 100.0f;
+                    srcClash.maxDistance = 80.0f;
                     //Log(saber.name + " Setting Clip Volume");
                     srcClash.volume = 0.0f; //Start volume off so it doesn't BVZZRRTTPFFTTT
                                             //Log(saber.name + " Setting Clip Priority");

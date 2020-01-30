@@ -20,7 +20,7 @@ namespace AudioModifiers {
         public float SpeedupSmoothing = 1.0f; //4.0f
         public float SlowdownSmoothing = 1.0f; //4.0f
         public bool ClashFX = true;
-        public float ClashVolume = 1.0f;
+        public float ClashVolume = 0.85f;
         public float minMusicTime = 0.0f;
         public bool showDebugSpheres = false;
 

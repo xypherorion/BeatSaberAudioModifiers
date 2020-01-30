@@ -1,4 +1,4 @@
-AudioModifiers 1.1.4.0 README
+AudioModifiers 1.1.7.0 README
 By Xypher Orion
 
 Audio Modifiers changes Beat Saber game audio to use custom sounds

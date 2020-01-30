@@ -29,19 +29,19 @@ namespace AudioModifiers {
             //Check.Null(this._audioSource);
         }
 
-        void Update() {
+        void FixedUpdate() {
             if (_swordPoint != null) {
-                targetSpeed = (Time.deltaTime == 0f) ? 
+                targetSpeed = (Time.fixedDeltaTime == 0f) ? 
                     0f :
-                    _speedMultiplier * Vector3.Distance(_swordPoint.position, _prevPoint) / Time.deltaTime;
+                    _speedMultiplier * Vector3.Distance(_swordPoint.position, _prevPoint) / Time.fixedDeltaTime;
                 
                 _speed = (targetSpeed < _speed) ? 
-                    Mathf.Clamp01(Mathf.Lerp(_speed, targetSpeed, Time.deltaTime * _downSmooth)) :
-                    Mathf.Clamp01(Mathf.Lerp(_speed, targetSpeed, Time.deltaTime * _upSmooth));
+                    Mathf.Clamp01(Mathf.Lerp(_speed, targetSpeed, Time.fixedDeltaTime * _downSmooth)) :
+                    Mathf.Clamp01(Mathf.Lerp(_speed, targetSpeed, Time.fixedDeltaTime * _upSmooth));
 
                 if (_audioSource != null) {
                     _audioSource.pitch = _pitchBySpeedCurve.Evaluate(_speed);
-                    _audioSource.volume = _gainBySpeedCurve.Evaluate(_speed) * 10.0f;
+                    _audioSource.volume = _gainBySpeedCurve.Evaluate(_speed);
                 } else
                     AudioModifiersPlugin.Log("Houstin, where the hell is my audio source!?");
 
