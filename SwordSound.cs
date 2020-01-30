@@ -17,7 +17,7 @@ namespace AudioModifiers {
         public AudioSource _audioSource;
         public AnimationCurve _pitchBySpeedCurve;
         public AnimationCurve _gainBySpeedCurve;
-        public float _speedMultiplier = 1.0f; //0.05f
+        public float _speedMultiplier = 0.05f; //0.05f
         public float _upSmooth = 1.0f;
         public float _downSmooth = 1.0f;
         public Vector3 _prevPoint = default(Vector3);
@@ -41,7 +41,7 @@ namespace AudioModifiers {
 
                 if (_audioSource != null) {
                     _audioSource.pitch = _pitchBySpeedCurve.Evaluate(_speed);
-                    _audioSource.volume = _gainBySpeedCurve.Evaluate(_speed);
+                    _audioSource.volume = _gainBySpeedCurve.Evaluate(_speed) * 10.0f;
                 } else
                     AudioModifiersPlugin.Log("Houstin, where the hell is my audio source!?");
 

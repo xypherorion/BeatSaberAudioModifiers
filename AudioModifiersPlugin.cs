@@ -24,11 +24,11 @@ namespace AudioModifiers {
             Unknown
         }
 
-        public string Name => "AudioModifiers";
-        public string Version => "1.1.0.1";
+        public const string Name = "AudioModifiers";
+        public const string Version = "1.1.7.0";
 
         public bool writeLogOnExit = true;
-        public static string logFilePath = "./UserData/AudioModifiers/AudioModifiers.log";
+        public static string logFilePath = $"./UserData/{Name}.log";
         public static string LogFileData = "";
         protected static string appFolder = ".\\";
 
@@ -48,7 +48,7 @@ namespace AudioModifiers {
 
         public static AudioSource ClashSource = null;
 
-        public static string cfgFilePath = "./UserData/AudioModifiers/AudioModifiers.json";
+        public static string cfgFilePath = $"./UserData/{Name}/{Name}.json";
         public static ModConfiguration cfg = null;
 
         public static void Log(string message) {
@@ -393,9 +393,9 @@ namespace AudioModifiers {
             //Log(saber.name + " Setting Clip Spatial Blend");
             ss._audioSource.spatialBlend = 1.0f;
             //Log(saber.name + " Setting Clip Minimum Distance");
-            ss._audioSource.minDistance = 0.01f;
+            ss._audioSource.minDistance = 0.1f;
             //Log(saber.name + " Setting Clip Maximum Distance");
-            ss._audioSource.maxDistance = 100.0f;
+            ss._audioSource.maxDistance = 1000.0f;
             //Log(saber.name + " Setting Clip Volume");
             ss._audioSource.volume = 0.0f; //Start volume off so it doesn't BVZZRRTTPFFTTT
             //Log(saber.name + " Setting Clip Priority");
@@ -426,7 +426,7 @@ namespace AudioModifiers {
                 //Log(saber.name + " Setting Clip Gain-By-Speed Curve");
                 ss._gainBySpeedCurve.AddKey(0, 0.85f);
                 ss._gainBySpeedCurve.AddKey(0.5f, 0.95f);
-                ss._gainBySpeedCurve.AddKey(1.0f, 1.0f);
+                ss._gainBySpeedCurve.AddKey(1.0f, 10.0f);
             } else {
                 Log(saber.name + " Clip Gain-By-Speed Curve already Present");
             }
@@ -565,7 +565,7 @@ namespace AudioModifiers {
                     //Log(saber.name + " Setting Clip Spatial Blend");
                     srcClash.spatialBlend = 1.0f;
                     //Log(saber.name + " Setting Clip Minimum Distance");
-                    srcClash.minDistance = 0.01f;
+                    srcClash.minDistance = 0.1f;
                     //Log(saber.name + " Setting Clip Maximum Distance");
                     srcClash.maxDistance = 100.0f;
                     //Log(saber.name + " Setting Clip Volume");
