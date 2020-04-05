@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 //using System.Threading.Tasks;
-using Harmony;
+using HarmonyLib;
 using UnityEngine;
 
 namespace AudioModifiers {
@@ -11,7 +11,7 @@ namespace AudioModifiers {
     [HarmonyPatch("PlayExplosionSound", MethodType.Normal)]
     public class FireworksControllerExplosionSoundPatch {
         public static bool Prefix(ref FireworkItemController __instance) {
-            return !AudioModifiersPlugin.cfg.DisableFireworks;
+            return !AudioMod.cfg.DisableFireworks;
         }
     }
 
@@ -19,8 +19,8 @@ namespace AudioModifiers {
     [HarmonyPatch("Awake", MethodType.Normal)]
     public class FireworksControllerAwakePatch {
         public static bool Prefix(ref FireworkItemController __instance, ref RandomObjectPicker<AudioClip> ____randomAudioPicker) {
-            if (AudioModifiersPlugin.FireworksFX.Count > 0) {
-                ____randomAudioPicker = AudioModifiersPlugin.FireworkSFXPicker;
+            if (AudioMod.FireworksFX.Count > 0) {
+                ____randomAudioPicker = AudioMod.FireworkSFXPicker;
                 return false;
             }
             return true;

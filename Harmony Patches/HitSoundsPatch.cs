@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 //using System.Threading.Tasks;
-using Harmony;
+using HarmonyLib;
 using UnityEngine;
 
 namespace AudioModifiers {
@@ -12,10 +12,10 @@ namespace AudioModifiers {
     [HarmonyPatch("NoteWasCut", MethodType.Normal)]
     public class HitSoundsPatch {
         public static bool Prefix(ref NoteCutSoundEffect __instance, NoteController noteController, NoteCutInfo noteCutInfo, ref RandomObjectPicker<AudioClip> ____badCutRandomSoundPicker, ref NoteData ____noteData, ref bool ____noteWasCut, ref bool ____goodCut, ref bool ____handleWrongSaberTypeAsGood, ref AudioSource ____audioSource, ref double ____endDSPtime, ref float ____badCutVolume, ref float ____goodCutVolume) {
-            if (!AudioModifiersPlugin.cfg.EnableCustomSounds)
+            if (!AudioMod.cfg.EnableCustomSounds)
                 return true;
 
-            if(AudioModifiersPlugin.MissSoundPicker != null && AudioModifiersPlugin.HitSoundPicker != null) {
+            if(AudioMod.MissSoundPicker != null && AudioMod.HitSoundPicker != null) {
                 if (noteController.noteData.id != ____noteData.id)
                     return false;
 
@@ -23,8 +23,8 @@ namespace AudioModifiers {
 
                 if ((!____handleWrongSaberTypeAsGood && !noteCutInfo.allIsOK) ||
                     (____handleWrongSaberTypeAsGood && (!noteCutInfo.allExceptSaberTypeIsOK || noteCutInfo.saberTypeOK))) {
-                    if (AudioModifiersPlugin.MissSounds.Count > 0)
-                        ____audioSource.clip = AudioModifiersPlugin.MissSoundPicker.PickRandomObject();
+                    if (AudioMod.MissSounds.Count > 0)
+                        ____audioSource.clip = AudioMod.MissSoundPicker.PickRandomObject();
 
                     ____audioSource.time = 0f;
                     ____audioSource.Play();
@@ -33,13 +33,13 @@ namespace AudioModifiers {
                     ____endDSPtime = AudioSettings.dspTime + (double)____audioSource.clip.length + 0.10000000149011612;
                 } else {
                     //TODO: Detect hits and switch to different sound pickers
-                    if (AudioModifiersPlugin.HitSounds.Count > 0)
-                        ____audioSource.clip = AudioModifiersPlugin.HitSoundPicker.PickRandomObject();
+                    if (AudioMod.HitSounds.Count > 0)
+                        ____audioSource.clip = AudioMod.HitSoundPicker.PickRandomObject();
 
                     ____audioSource.time = 0f;
                     //____endDSPtime = AudioSettings.dspTime + (double)____audioSource.clip.length + 0.10000000149011612;
 
-                    ____audioSource.pitch = UnityEngine.Random.Range(1.0f - (AudioModifiersPlugin.cfg.PitchRange * 0.5f), 1.0f + (AudioModifiersPlugin.cfg.PitchRange * 0.5f));
+                    ____audioSource.pitch = UnityEngine.Random.Range(1.0f - (AudioMod.cfg.PitchRange * 0.5f), 1.0f + (AudioMod.cfg.PitchRange * 0.5f));
                     ____goodCut = true;
                     ____audioSource.volume = ____goodCutVolume;
                     ____audioSource.Play();

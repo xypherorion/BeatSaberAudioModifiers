@@ -43,11 +43,11 @@ namespace AudioModifiers {
                     _audioSource.pitch = _pitchBySpeedCurve.Evaluate(_speed);
                     _audioSource.volume = _gainBySpeedCurve.Evaluate(_speed);
                 } else
-                    AudioModifiersPlugin.Log("Houstin, where the hell is my audio source!?");
+                    AudioMod.Log("Houstin, where the hell is my audio source!?");
 
                 _prevPoint = _swordPoint.position;
             } else
-                AudioModifiersPlugin.Log("Wait a second...this sword isn't pointy!");
+                AudioMod.Log("Wait a second...this sword isn't pointy!");
         }
     }
 }

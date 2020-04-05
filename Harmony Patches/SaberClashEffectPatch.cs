@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Harmony;
+using HarmonyLib;
 using UnityEngine;
 using UnityEngine.XR;
 
@@ -12,7 +12,7 @@ namespace AudioModifiers.Harmony_Patches {
     [HarmonyPatch("LateUpdate", MethodType.Normal)]
     public class SaberClashEffectPatch {
         public static bool Prefix(ref SaberClashEffect __instance, ref SaberClashChecker ____saberClashChecker, ref HapticFeedbackController ____hapticFeedbackController, ref bool ____sabersAreClashing, ref ParticleSystem.EmissionModule ____sparkleParticleSystemEmmisionModule, ref ParticleSystem.EmissionModule ____glowParticleSystemEmmisionModule, ref ParticleSystem ____glowParticleSystem) {
-            if (!AudioModifiersPlugin.cfg.EnableCustomSounds)
+            if (!AudioMod.cfg.EnableCustomSounds)
                 return true;
 
             if (____saberClashChecker.sabersAreClashing) {
@@ -26,10 +26,10 @@ namespace AudioModifiers.Harmony_Patches {
                     ____glowParticleSystemEmmisionModule.enabled = true;
 
 
-                    if (AudioModifiersPlugin.cfg.ClashFX && AudioModifiersPlugin.ClashSource != null) {
-                        if (!AudioModifiersPlugin.ClashSource.isPlaying) {
+                    if (AudioMod.cfg.ClashFX && AudioMod.ClashSource != null) {
+                        if (!AudioMod.ClashSource.isPlaying) {
                             //Play random clash sound if previous has finished playing
-                            if (AudioModifiersPlugin.SaberClashFX.Count > 0) {
+                            if (AudioMod.SaberClashFX.Count > 0) {
                                 /*
                                 AudioModifiersPlugin.ClashSource.loop = false;
                                 AudioModifiersPlugin.ClashSource.spatialize = true;
@@ -40,15 +40,15 @@ namespace AudioModifiers.Harmony_Patches {
                                 AudioModifiersPlugin.ClashSource.priority = 32;
                                 AudioModifiersPlugin.ClashSource.rolloffMode = AudioRolloffMode.Logarithmic;
                                 */
-                                AudioModifiersPlugin.ClashSource.clip = AudioModifiersPlugin.SaberClashPicker.PickRandomObject();
-                                if (AudioModifiersPlugin.ClashSource.clip != null) {
-                                    if (AudioModifiersPlugin.ClashSource.clip.loadState == AudioDataLoadState.Unloaded)
-                                        AudioModifiersPlugin.ClashSource.clip.LoadAudioData();
-                                    AudioModifiersPlugin.ClashSource.Play();
-                                    AudioModifiersPlugin.Log("Set Clash SFX to " + AudioModifiersPlugin.ClashSource.clip.name);
+                                AudioMod.ClashSource.clip = AudioMod.SaberClashPicker.PickRandomObject();
+                                if (AudioMod.ClashSource.clip != null) {
+                                    if (AudioMod.ClashSource.clip.loadState == AudioDataLoadState.Unloaded)
+                                        AudioMod.ClashSource.clip.LoadAudioData();
+                                    AudioMod.ClashSource.Play();
+                                    AudioMod.Log("Set Clash SFX to " + AudioMod.ClashSource.clip.name);
                                 } else {
 
-                                    AudioModifiersPlugin.Log("Set Clash SFX to ... well ... nothing.");
+                                    AudioMod.Log("Set Clash SFX to ... well ... nothing.");
                                 }
                             }
                         }
