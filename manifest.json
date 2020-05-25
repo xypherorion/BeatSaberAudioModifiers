@@ -2,9 +2,9 @@
   "$schema": "https://raw.githubusercontent.com/nike4613/ModSaber-MetadataFileSchema/master/Schema.json",
   "author": "Xypher Orion",
   "description": "What is that sound?",
-  "gameVersion": "1.9.0",
+  "gameVersion": "1.10.0",
   "id": "audiomodifiers",
   "name": "AudioModifiers",
-  "version": "1.1.9.0",
+  "version": "0.1.10.0",
   "features": []
 }

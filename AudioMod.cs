@@ -26,7 +26,7 @@ namespace AudioModifiers {
         }
 
         public const string Name = "AudioModifiers";
-        public const string Version = "1.1.8.0";
+        public const string Version = "0.1.10.0 A";
 
         public bool writeLogOnExit = true;
         public static string logFilePath = $"./UserData/{Name}.log";
